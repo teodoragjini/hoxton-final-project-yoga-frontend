@@ -4,8 +4,8 @@ import { Link } from "react-router-dom";
 export function CoursesPage() {
   const [courses, setCourses] = useState([]);
 
-  const fetchData = () => {
-    fetch("http://localhost:1234/courses")
+  const fetchData = (category) => {
+    fetch(`http://localhost:1234/courses?category=${category}`)
       .then((response) => {
         return response.json();
       })
@@ -15,8 +15,10 @@ export function CoursesPage() {
   };
 
   useEffect(() => {
-    fetchData();
+    fetchData(null);
   }, []);
+
+
 
   return (
     <div className="relative bg-gray-50 px-4 py-16">
@@ -31,8 +33,18 @@ export function CoursesPage() {
 
         <div className="mt-8">
           <ul className="grid grid-cols-6 gap-y-2">
+          <li>
+              <Link to="/courses?category=All"
+              onClick={() => fetchData('null')}
+              className="hover:underline">
+                All
+              </Link>
+            </li>
+
             <li>
-              <Link to="/courses?category=Beginner" className="hover:underline">
+              <Link to="/courses?category=Beginner"
+              onClick={() => fetchData('Beginner')}
+              className="hover:underline">
                 Beginner
               </Link>
             </li>
@@ -40,6 +52,7 @@ export function CoursesPage() {
             <li>
               <Link
                 to="/courses?category=Intermediate"
+                onClick={() => fetchData('Intermediate')}
                 className="hover:underline"
               >
                 Intermediate
@@ -47,7 +60,9 @@ export function CoursesPage() {
             </li>
 
             <li>
-              <Link to="/courses?category=Advanced" className="hover:underline">
+              <Link to="/courses?category=Advanced"
+              onClick={() => fetchData('Advanced')}
+              className="hover:underline">
                 Advanced
               </Link>
             </li>
@@ -70,6 +85,7 @@ export function CoursesPage() {
                     <p className="text-sm font-medium text-indigo-600">
                       <Link
                         to={`/courses?category=${course.category}`}
+                        onClick={() => fetchData(course.category)}
                         className="hover:underline"
                       >
                         {course.category}
