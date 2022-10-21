@@ -1,11 +1,36 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
-export function SingleCoursePage() {
+export function SingleCoursePage({ currentUser }) {
   let params = useParams();
 
   const [course, SetCourse] = useState(null);
   const [video, SetVideo] = useState(null);
+  const [reviews, SetReviews] = useState([]);
+
+  function createReview(event) {
+    event.preventDefault();
+
+    const bodyData = {
+      comment: event.target.comment.value,
+      userId: event.target.userId.value,
+      courseId: event.target.courseId.value,
+    };
+
+    fetch(`http://localhost:1234/reviews`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(bodyData),
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        SetReviews([res, ...reviews]);
+
+        event.target.comment.value = "";
+      });
+  }
 
   useEffect(() => {
     fetch(`http://localhost:1234/courses/${params.id}`)
@@ -13,8 +38,23 @@ export function SingleCoursePage() {
       .then((data) => {
         SetCourse(data);
         SetVideo(data.videos[0]);
+        SetReviews(data.reviews);
       });
   }, []);
+
+  function deleteReview(review) {
+    fetch(`http://localhost:1234/reviews/${review.id}`, {
+      method: "Delete",
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        let reviewsWithoutDeletedReview = reviews.filter(
+          (reviewInList) => review.id !== reviewInList.id
+        );
+
+        SetReviews(reviewsWithoutDeletedReview);
+      });
+  }
 
   function buy(course) {
     fetch(`http://localhost:1234/courses/${course.id}/buy`, {
@@ -28,12 +68,12 @@ export function SingleCoursePage() {
         if (data.error) {
           alert(data.error);
         } else {
-          location.reload()
+          location.reload();
         }
       });
   }
 
-  if (course === null) return <h2>Loading</h2>;
+  if (course === null || !params) return <h2>Loading</h2>;
 
   return (
     <div className="bg-white">
@@ -66,7 +106,7 @@ export function SingleCoursePage() {
               <div className="prose prose-sm mt-4 text-gray-500">
                 <ul className="list-disc ml-4">
                   {course.videos.map((video) => (
-                    <li onClick={() => SetVideo(video)}>
+                    <li onClick={() => SetVideo(video)} key={video.id}>
                       <span className="hover:underline hover:cursor-pointer">
                         {video.title}
                       </span>
@@ -78,7 +118,10 @@ export function SingleCoursePage() {
           </div>
 
           <div className="mt-16 w-full lg:col-span-4 lg:mt-0">
-            <form className="flex flex-col">
+            <form className="flex flex-col" onSubmit={createReview}>
+              <input name="userId" type="hidden" value={currentUser?.id} />
+              <input name="courseId" type="hidden" value={params.id} />
+
               <textarea
                 name="comment"
                 className="w-full rounded-md border border-gray-300 p-4"
@@ -93,8 +136,11 @@ export function SingleCoursePage() {
               </button>
             </form>
 
-            {course.reviews.map((review) => (
-              <div className="flex space-x-4 text-sm text-gray-500">
+            {reviews.map((review) => (
+              <div
+                className="flex space-x-4 text-sm text-gray-500"
+                key={review.id}
+              >
                 <div className="flex-none py-10">
                   <img
                     src={review.User.image}
@@ -111,6 +157,22 @@ export function SingleCoursePage() {
 
                   <div className="mt-4 text-gray-500">
                     <p>{review.comment}</p>
+                    {review.User.id === currentUser?.id ? (
+                      <div className="flex space-x-4 mt-4">
+                        <button
+                          onClick={() => deleteReview(review)}
+                          className="bg-red-500 text-white py-1 w-full rounded-md"
+                        >
+                          Delete
+                        </button>
+
+                        {/* <button className="bg-yellow-500 text-white py-1 w-full rounded-md">
+                            Edit
+                          </button> */}
+                      </div>
+                    ) : (
+                      ""
+                    )}
                   </div>
                 </div>
               </div>

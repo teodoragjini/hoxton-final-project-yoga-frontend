@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 export function InstructorsPage() {
   const [instructors, setInstructors] = useState([]);
@@ -28,15 +29,19 @@ export function InstructorsPage() {
               <li>
                 <div className="space-y-4 sm:grid sm:grid-cols-3 sm:gap-6 sm:space-y-0 lg:gap-8">
                   <div className="w-full h-16">
-                    <img
-                      className="rounded-lg object-cover"
-                      src={instructor.image}
-                    />
+                    <Link to={`/instructors/${instructor.id}`}>
+                      <img
+                        className="rounded-lg object-cover"
+                        src={instructor.image}
+                      />
+                    </Link>
                   </div>
 
                   <div className="sm:col-span-2">
                     <div className="text-lg font-medium mb-4">
-                      <h3 className="mb-1">{instructor.name}</h3>
+                      <Link to={`/instructors/${instructor.id}`}>
+                        <h3 className="mb-1">{instructor.name}</h3>
+                      </Link>
 
                       <p className="text-indigo-600">{instructor.level}</p>
                     </div>

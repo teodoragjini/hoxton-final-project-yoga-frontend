@@ -45,7 +45,7 @@ export function SignInPage({ signIn }: any) {
                     signIn(data);
 
                     let navigate = useNavigate();
-                    navigate("/");
+                    navigate("/courses");
                   }
                 });
             }}
